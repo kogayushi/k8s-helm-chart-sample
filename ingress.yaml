@@ -1,0 +1,29 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: k8s-sample
+  labels:
+    app: k8s-sample
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+    - host: k8s-sample.local
+      http:
+        paths:
+          - path: /login
+            backend:
+              serviceName: rest-api-sample
+              servicePort: 80
+          - path: /logout
+            backend:
+              serviceName: rest-api-sample
+              servicePort: 80
+          - path: /api/
+            backend:
+              serviceName: rest-api-sample
+              servicePort: 80
+          - path: /
+            backend:
+              serviceName: spa-sample
+              servicePort: 80

@@ -1,0 +1,31 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: rest-api
+  labels:
+    app: rest-api
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+spec:
+  rules:
+    - host: rest-api-sample
+      http:
+        paths:
+          - path: /login
+            backend:
+              serviceName: rest-api-sample
+              servicePort: 80
+          - path: /logout
+            backend:
+              serviceName: rest-api-sample
+              servicePort: 80
+          - path: /api/*
+            backend:
+              serviceName: rest-api-sample
+              servicePort: 80
+          - path: /*
+            backend:
+              serviceName: spa-sample
+              servicePort: 80

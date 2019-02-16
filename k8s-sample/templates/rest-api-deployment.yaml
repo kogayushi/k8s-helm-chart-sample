@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rest-api-sample
+  labels:
+    app: rest-api-sample
+    test: test
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: rest-api-sample
+  template:
+    metadata:
+      labels:
+        app: rest-api-sample
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.15.8-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 25m
+          volumeMounts:
+          - mountPath: /etc/nginx/nginx.conf
+            subPath: nginx.conf
+            readOnly: true
+            name: k8s-sample-config
+          - mountPath: /etc/nginx/conf.d/default.conf
+            subPath: default.conf
+            readOnly: true
+            name: k8s-sample-config
+        - name: rest-api-app
+          image: kogayushi/k8s-rest-api-sample-app:0.0.2-SNAPSHOT
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 25m
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: develop
+      volumes:
+       - name: k8s-sample-config
+         configMap:
+           name: k8s-sample-configmap
+           items:
+             - key: nginx.conf
+               path: nginx.conf
+             - key: default.conf
+               path: default.conf

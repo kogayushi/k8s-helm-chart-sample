@@ -1,0 +1,67 @@
+# Application Load Balancer (ALB) Ingress Controller Deployment Manifest.
+# This manifest details sensible defaults for deploying an ALB Ingress Controller.
+# GitHub: https://github.com/kubernetes-sigs/aws-alb-ingress-controller
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: alb-ingress-controller
+  name: alb-ingress-controller
+  # Namespace the ALB Ingress Controller should run in. Does not impact which
+  # namespaces it's able to resolve ingress resource for. For limiting ingress
+  # namespace scope, see --watch-namespace.
+  namespace: kube-system
+  annotations:
+    iam.amazonaws.com/role: arn:aws:iam::360391565533:role/alb-ingress
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alb-ingress-controller
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: alb-ingress-controller
+    spec:
+      containers:
+        - args:
+            - --ingress-class=alb
+            - --cluster-name=develop
+          env:
+          image: 894847497797.dkr.ecr.us-west-2.amazonaws.com/aws-alb-ingress-controller:v1.0.0
+          imagePullPolicy: Always
+          name: server
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      serviceAccountName: alb-ingress
+      serviceAccount: alb-ingress
+      rules:
+        - host: k8s-sample.local
+          http:
+            paths:
+              - path: /login
+                backend:
+                  serviceName: rest-api-sample
+                  servicePort: 80
+              - path: /logout
+                backend:
+                  serviceName: rest-api-sample
+                  servicePort: 80
+              - path: /api/
+                backend:
+                  serviceName: rest-api-sample
+                  servicePort: 80
+              - path: /
+                backend:
+                  serviceName: spa-sample
+                  servicePort: 80

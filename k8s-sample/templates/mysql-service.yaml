@@ -1,0 +1,8 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: dev-database
+  namespace: default
+spec:
+  type: ExternalName
+  externalName: k8s-sample.cluster-cw06ytz0oayz.ap-northeast-1.rds.amazonaws.com
